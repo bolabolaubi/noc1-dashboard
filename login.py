@@ -21,7 +21,7 @@ def hash_password(password):
 # Ambil data admin dari sheet
 @st.cache_data(ttl=300)
 def load_admin_data():
-    sheet = connect_sheet(spreadsheet_id, "Admin Data")
+    sheet = connect_sheet(sheet_name="Admin Data")
     return sheet.get_all_records()
 
 # Form login
