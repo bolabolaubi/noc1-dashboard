@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
+import hashlib
 from sheets_connector import connect_sheet, get_master_data
 
+# ============================ #
+# 🔒 Autentikasi Wajib
+# ============================ #
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
     st.warning("⚠️ Anda harus login terlebih dahulu.")
     st.stop()
@@ -9,15 +13,14 @@ if "authenticated" not in st.session_state or not st.session_state["authenticate
 st.set_page_config(page_title="Admin Master Data", layout="wide")
 st.title("⚙️ Admin Master Data")
 
-# ✅ Ambil Spreadsheet ID dari konfigurasi session
 spreadsheet_id = st.session_state.get("spreadsheet_id")
 if not spreadsheet_id:
     st.warning("⚠️ Spreadsheet belum dipilih. Silakan set di halaman Admin terlebih dahulu.")
     st.stop()
 
-# ============================
+# ============================ #
 # 🔧 Fungsi Tambah Data Unik
-# ============================
+# ============================ #
 def tambah_data(sheet_name, data_dict, unique_keys):
     sheet = connect_sheet(spreadsheet_id, sheet_name)
     existing_records = sheet.get_all_records()
@@ -33,14 +36,20 @@ def tambah_data(sheet_name, data_dict, unique_keys):
     sheet.append_row(list(data_dict.values()))
     st.success("✅ Data berhasil ditambahkan.")
 
-# ============================
-# 📁 Layout Tab
-# ============================
-tab1, tab2, tab3 = st.tabs(["👥 Data Customer", "🧍 Data PIC", "🧩 Data Layanan"])
+# ============================ #
+# 🔐 Fungsi Hash Password
+# ============================ #
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
-# ============================
+# ============================ #
+# 📁 Layout Tab
+# ============================ #
+tab1, tab2, tab3, tab4 = st.tabs(["👥 Data Customer", "🧍 Data PIC", "🧩 Data Layanan", "🔐 Admin Login"])
+
+# ============================ #
 # 👥 TAB: Customer
-# ============================
+# ============================ #
 with tab1:
     st.subheader("➕ Tambah Customer Baru")
     new_customer = st.text_input("Nama Customer")
@@ -57,9 +66,9 @@ with tab1:
         st.warning("⚠️ Belum ada data Customer.")
         st.text(str(e))
 
-# ============================
+# ============================ #
 # 🧍 TAB: PIC
-# ============================
+# ============================ #
 with tab2:
     st.subheader("➕ Tambah PIC Baru")
     new_pic = st.text_input("Nama PIC")
@@ -76,9 +85,9 @@ with tab2:
         st.warning("⚠️ Belum ada data PIC.")
         st.text(str(e))
 
-# ============================
+# ============================ #
 # 🧩 TAB: Layanan
-# ============================
+# ============================ #
 with tab3:
     st.subheader("➕ Tambah Relasi Device - Layanan")
     new_device = st.text_input("Kode Device")
@@ -95,3 +104,15 @@ with tab3:
     except Exception as e:
         st.warning("⚠️ Belum ada data Layanan.")
         st.text(str(e))
+
+# ============================ #
+# 🔐 TAB: Admin Login
+# ============================ #
+with tab4:
+    st.subheader("➕ Tambah Admin Login")
+    new_user = st.text_input("Username Admin")
+    new_pass = st.text_input("Password Admin", type="password")
+    if st.button("Tambah Admin"):
+        if new_user.strip() and new_pass.strip():
+            hashed = hash_password(new_pass)
+            tambah_data("Admin Data", {"Username": new_user.strip(), "Password": hashed}, ["Username"])
