@@ -6,7 +6,11 @@ from google.oauth2 import service_account
 # 🔌 Koneksi ke Google Sheet
 def connect_sheet(spreadsheet_id, sheet_name):
     creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"]
+        st.secrets["gcp_service_account"],
+        scopes=[
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
     )
     client = gspread.authorize(creds)
     return client.open_by_key(spreadsheet_id).worksheet(sheet_name)
