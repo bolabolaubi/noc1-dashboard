@@ -6,13 +6,16 @@ from sheets_connector import append_ticket_safely, generate_ticket_number, conne
 from email_generator import make_email
 
 # 🌐 Atur locale bahasa Indonesia
-try:
-    locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
-except:
+def set_locale_indonesia():
     try:
-        locale.setlocale(locale.LC_TIME, 'id_ID')
-    except:
-        locale.setlocale(locale.LC_TIME, 'ind')  # Fallback untuk Windows
+        locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')  # Untuk Linux / Streamlit Cloud
+    except locale.Error:
+        try:
+            locale.setlocale(locale.LC_TIME, 'id_ID')  # Windows
+        except locale.Error:
+            pass  # Gunakan default jika semua gagal
+
+set_locale_indonesia()
 
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
     st.warning("⚠️ Anda harus login terlebih dahulu.")
