@@ -1,13 +1,15 @@
+import streamlit as st
 from datetime import datetime
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 
 # 🔌 Koneksi ke Google Sheet
 def connect_sheet(spreadsheet_id, sheet_name):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"]
+    )
     client = gspread.authorize(creds)
-    return client.open(spreadsheet_id).worksheet(sheet_name)
+    return client.open_by_key(spreadsheet_id).worksheet(sheet_name)
 
 # 🆔 Generate Nomor Tiket Otomatis
 def generate_ticket_number(spreadsheet_id, sheet_name):
